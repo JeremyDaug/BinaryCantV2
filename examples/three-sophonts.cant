@@ -1,0 +1,5 @@
+STATEMENT<Assertion,Honest,Direct>{
+    int(3)
+    sophont.obj<S,Present,Numbered>
+    mover.act<V,Present,InProgress>
+}

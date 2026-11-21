@@ -1,0 +1,9 @@
+STATEMENT<Condition,Honest,Direct>{
+    addressee.obj<S,Present>
+    dwelling.loc<V,Present>
+}
+STATEMENT<Result,Honest,Direct>{
+    self.obj<S,Future>
+    dwelling.loc<V,Future>
+}
+IF

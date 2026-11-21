@@ -1,0 +1,4 @@
+STATEMENT<Assertion,Honest,Conclusion>{
+    int(2) int(3) ADD TO_SUBJECT
+    int(5) TO_VERB<Present>
+}

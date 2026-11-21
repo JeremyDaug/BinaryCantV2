@@ -1,0 +1,9 @@
+STATEMENT<Assertion,Honest,Direct>{
+    self.obj<S,Present>
+    auditory_communicator.act<V,Present>
+    STATEMENT<Assertion,Honest,Direct>{
+        addressee.obj<S,Present>
+        dwelling.loc<V,Present>
+    }
+    TO_OBJECT
+}
