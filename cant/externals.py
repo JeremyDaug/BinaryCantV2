@@ -12,10 +12,10 @@ import re
 import struct
 from fractions import Fraction
 
-from .fields import PAYLOAD_MASK, field, put, signed, unsigned
+from .fields import CantError, PAYLOAD_MASK, field, put, signed, unsigned
 
 
-class ExternalError(ValueError):
+class ExternalError(CantError):
     pass
 
 

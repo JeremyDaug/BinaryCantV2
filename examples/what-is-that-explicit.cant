@@ -1,0 +1,3 @@
+QUERY<Verb,Honest,Direct>{
+    that.obj<S,Present,Specific>
+}

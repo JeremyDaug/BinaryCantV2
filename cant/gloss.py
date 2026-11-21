@@ -207,7 +207,7 @@ def parse(text, lexicon=None):
             t = EXT_BY_NAME[val]
             try:
                 payload, conts = t.encode(_split_args(nv))
-            except ExternalError as e:
+            except (CantError, ValueError) as e:
                 raise GlossError(f"line {line}: {val}(): {e}") from None
             if peek()[0] == "flags":
                 raise GlossError(f"line {line}: externals carry no grammar; apply a TO_* cast after it")

@@ -7,8 +7,7 @@ from . import fields as F
 from .externals import REGISTRY, ext_word, OPERATION_CODE
 
 
-class CantError(ValueError):
-    """Any encoding, decoding or validation error."""
+from .fields import CantError  # noqa: F401  (re-exported)
 
 
 @dataclass

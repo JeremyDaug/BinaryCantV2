@@ -1,0 +1,7 @@
+STATEMENT<Assertion,Honest,Direct>{
+    other.obj<S,Present,Specific,Singular>   ; he (gender-neutral third party)
+    cover.obj<O,Present,Specific,Singular>   ; the shirt
+    possession.rel<R,Present>                ; S possesses O
+    rgb(#FF0000)                             ; red, as an external colour
+    TO_VERB<Present,^3>                      ; ...is red; ^3 = the shirt is the actor
+}

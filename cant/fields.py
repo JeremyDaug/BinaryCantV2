@@ -8,6 +8,10 @@ is the single source of truth the codec uses.
 MASK64 = (1 << 64) - 1
 
 
+class CantError(ValueError):
+    """Any encoding, decoding or validation error."""
+
+
 def field(word, shift, width):
     """Extract an unsigned field."""
     return (word >> shift) & ((1 << width) - 1)
@@ -16,7 +20,7 @@ def field(word, shift, width):
 def put(value, shift, width, name="field"):
     """Place an unsigned value into a field, checking range."""
     if not 0 <= value < (1 << width):
-        raise ValueError(f"{name} value {value} does not fit in {width} bits")
+        raise CantError(f"{name} value {value} does not fit in {width} bits")
     return value << shift
 
 
@@ -31,7 +35,7 @@ def unsigned(value, width, name="value"):
     """Encode a signed integer as `width`-bit two's complement."""
     lo, hi = -(1 << (width - 1)), (1 << (width - 1)) - 1
     if not lo <= value <= hi:
-        raise ValueError(f"{name} {value} out of signed {width}-bit range [{lo}, {hi}]")
+        raise CantError(f"{name} {value} out of signed {width}-bit range [{lo}, {hi}]")
     return value & ((1 << width) - 1)
 
 

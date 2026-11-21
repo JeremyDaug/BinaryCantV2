@@ -1,0 +1,7 @@
+STATEMENT<Assertion,Honest,Direct>{
+    id(1) TO_SUBJECT          ; Jim
+    id(2) TO_OBJECT           ; Carol
+    partner.rel<R,Present>    ; couple
+    id(3) TO_OBJECT           ; Jack
+    kin.rel<R,Present>        ; family
+}

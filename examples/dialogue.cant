@@ -1,0 +1,13 @@
+; file
+STATEMENT<Assertion,Honest,Direct>{       ; Narrator: sets shared context
+    that.obj<T,Present,Specific>
+}
+speaker(1)
+QUERY<Verb,Honest,Direct>{
+    that.obj<S,Present,Specific>
+}
+speaker(2)
+STATEMENT<Assertion,Honest,Direct>{
+    that.obj<S,Present,Specific>
+    tool.obj<V,Present>
+}
