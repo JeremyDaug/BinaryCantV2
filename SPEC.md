@@ -122,8 +122,9 @@ Reserved roots **[DOC Words Methodology]**:
 * **Object**: what is acted upon. A sentence may have more than one.
 * **Topic**: what the conversation relates to without talking about it directly.
 * **Verb**: a change of state or information. Objects used as verbs mean *to be / become*
-  (`you⟨S⟩ cat⟨V⟩` = you are a cat). Locations used as verbs mean *to be at / go to*
-  (`I⟨S⟩ home⟨V⟩` = I am home). Relations used as verbs mean *acts like a*.
+  (`you⟨S⟩ cat⟨V⟩` = you are a cat). Locations used as verbs mean *to be at*
+  (`I⟨S⟩ home⟨V⟩` = I am home). Progression refines this: Unstarted/InProgress = *going to*,
+  Complete = *arrived at* **[V2.1, DECISIONS D-20]**. Relations used as verbs mean *acts like a*.
 * **Modifier**: like an adjective or adverb. Modifiers stack and bind to the nearest preceding
   non-modifier (`Jim⟨S⟩ cat⟨M⟩ red⟨M⟩` all apply to Jim). Any non-modifier ends the chain.
 * **Relation**: a relative state between static entities. With implicit binding it applies
@@ -638,7 +639,7 @@ C000000200000002
 7E01010000000000
 ```
 
-### 12.8 Conditional: "If you are home, I will go home."
+### 12.8 Conditional: "If you are home, I will be home."
 
 A location used as a verb means *to be at / go to*. Neither sentence is evaluated until `IF`
 runs **[DOC]**.
