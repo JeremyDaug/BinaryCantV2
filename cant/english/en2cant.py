@@ -59,7 +59,7 @@ class ParseError(ValueError):
 
 # ------------------------------------------------------------------ tokenising
 def split_sentences(text):
-    parts = re.findall(r"[^.?!]+(?:[.?!]+(?:\s*\([a-z ]+\)[.?!]?)?)?", text.strip())
+    parts = re.findall(r"(?:\d\.\d|[^.?!])+(?:[.?!]+(?:\s*\([a-z ]+\)[.?!]?)?)?", text.strip())
     return [p.strip() for p in parts if p.strip(" .?!")]
 
 
@@ -71,7 +71,7 @@ def tokenize(sentence):
         punct = m.group(1)[-1]
         s = s[:m.start()]
     toks = []
-    for raw in re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?(?<=s)'|[A-Za-z]+(?:'[A-Za-z]+)?|\d+|,|#[0-9A-Fa-f]{6}", s):
+    for raw in re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?(?<=s)'|[A-Za-z]+(?:'[A-Za-z]+)?|\d+\.\d+|\d+|,|#[0-9A-Fa-f]{6}", s):
         low = raw.lower()
         if low in CONTRACTIONS:
             for part in CONTRACTIONS[low].split():
@@ -213,6 +213,9 @@ class Parser:
                     return np2, j
         if i < n and morph.number_value(toks[i].w) is not None:
             v = morph.number_value(toks[i].w)
+            if toks[i].w in morph.TENS and i + 1 < n and toks[i + 1].w in morph.NUMBER_WORDS[1:10]:
+                i += 1                                  # forty-two
+                v += morph.number_value(toks[i].w)
             i += 1
             while i < n and toks[i].w in ("hundred", "thousand"):
                 v *= morph.number_value(toks[i].w)
@@ -629,17 +632,22 @@ class Builder:
         g = Grammar(**{**g.__dict__, "role": 0})
         self.add(Operation(OPS["TO_" + F.ROLES[role].upper()], g.pack_high() >> 32))
 
+    @staticmethod
+    def number_ext(v):
+        t = EXT["float64"] if isinstance(v, float) else EXT["int"]   # decimals: exact binary64
+        return External(t.code, *t.encode([repr(v) if isinstance(v, float) else str(v)]))
+
     def np(self, np, role, **extra):
         g = Grammar(role=role, **extra)
         if np.kind == "number":
-            idx = self.add(External(EXT["int"].code, *EXT["int"].encode([str(np.number)])))
+            idx = self.add(self.number_ext(np.number))
             self.cast(role, g)
             return idx
         if np.number is not None:
             if np.kind == "text":
                 g.plural = 2
             else:
-                self.add(External(EXT["int"].code, *EXT["int"].encode([str(np.number)])))
+                self.add(self.number_ext(np.number))
                 g.plural = 3
         elif np.kind in ("pron", "dem"):
             g.plural = 2 if np.plural else 1

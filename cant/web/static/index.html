@@ -196,10 +196,9 @@ async function api(path, body){
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button, section").forEach(x => x.classList.remove("on"));
   b.classList.add("on"); $("#" + b.dataset.tab).classList.add("on");
-  if(b.dataset.tab === "lexicon" && !lexLoaded) loadLexicon();
-  location.hash = b.dataset.tab;
+  onTab(b.dataset.tab);
+  history.replaceState(null, "", "#" + b.dataset.tab);
 });
-if(location.hash){ const b = document.querySelector(`nav button[data-tab="${location.hash.slice(1)}"]`); if(b) b.click(); }
 
 const SEG_COLOR = n => `var(--c-${n}, #888)`;
 function bitRow(w){
@@ -336,14 +335,24 @@ async function runDs(){
     $("#ds-h").textContent = r.hamming; $("#ds-tree").textContent = `${r.tree} · ${r.tree_label}`;
     const f = r.fields;
     $("#ds-words").innerHTML = [r.a, r.b].map((w,i) => `<div style="margin-bottom:10px"><b>${esc(w.name)}</b> <span class="dim">${w.hex} — ${esc(w.gloss)} · d${w.domain}/c${w.cluster}/k${w.concept}</span><div class="dbits">${dbits(w.bits, (i?r.a:r.b).bits)}</div></div>`).join("") +
-      `<div class="small">differing bits: ${r.differing_bits.length ? r.differing_bits.join(", ") : "none"} <span class="dim">(domain ${f.domain.length} · cluster ${f.cluster.length} · concept ${f.concept.length} · category ${f.category.length})</span></div>`;
+      `<div class="small">differing bit positions (31 = MSB): ${r.differing_bits.length ? r.differing_bits.join(", ") : "none"} <span class="dim">(domain ${f.domain.length} · cluster ${f.cluster.length} · concept ${f.concept.length} · category ${f.category.length})</span></div>`;
   }catch(e){ $("#ds-err").textContent = e.message; $("#ds-result").style.display = "none"; }
 }
 $("#ds-go").onclick = runDs;
 ["#ds-a","#ds-b"].forEach(s => $(s).addEventListener("keydown", e => { if(e.key === "Enter") runDs(); }));
 
 api("/api/meta").then(m => $("#meta").textContent = `${m.roots} roots · ${m.english_entries} English entries`).catch(()=>{});
-legend(); runEn();
+const opened = new Set();
+function onTab(t){
+  if(opened.has(t)) return; opened.add(t);
+  if(t === "translate") runEn();
+  if(t === "lexicon") loadLexicon();
+  if(t === "codec") runGl();
+  if(t === "distance") runDs();
+}
+legend();
+const startTab = document.querySelector(`nav button[data-tab="${location.hash.slice(1)}"]`);
+if(startTab) startTab.click(); else onTab("translate");
 </script>
 </body>
 </html>

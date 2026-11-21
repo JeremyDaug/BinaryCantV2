@@ -139,7 +139,7 @@ class Renderer:
             return f"entity-{e.payload}"
         if t.name == "int":
             v = t.value(e.payload, e.conts)
-            return morph.number_words(v) if 0 <= v <= 20 else str(v)
+            return morph.number_words(v) if 0 <= v < 100 else str(v)
         if t.numeric:
             return t.args(e.payload, e.conts)
         if t.name == "ptr":

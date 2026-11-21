@@ -83,6 +83,8 @@ TENS = {"thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eig
 def number_value(tok):
     if tok.isdigit():
         return int(tok)
+    if re.fullmatch(r"\d+\.\d+", tok):
+        return float(tok)
     if tok in NUMBER_WORDS:
         return NUMBER_WORDS.index(tok)
     if tok in TENS:
@@ -95,6 +97,10 @@ def number_value(tok):
 
 
 def number_words(n):
+    """0-99 as words (forty-two); larger numbers stay as digits."""
     if 0 <= n <= 20:
         return NUMBER_WORDS[n]
+    if 20 < n < 100:
+        tens = {v: k for k, v in TENS.items()}[n // 10 * 10]
+        return tens + ("-" + NUMBER_WORDS[n % 10] if n % 10 else "")
     return str(n)

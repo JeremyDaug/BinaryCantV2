@@ -132,7 +132,10 @@ class Robustness(unittest.TestCase):
         self.assertTrue(any("Mary" in w for w in warnings))
 
     def test_numbers(self):
-        self.assertEqual(round_trip("I have 42 books.")[0], "I have 42 books.")
+        self.assertEqual(round_trip("I have 42 books.")[0], "I have forty-two books.")
+        self.assertEqual(round_trip("I have forty-two books.")[0], "I have forty-two books.")
+        self.assertEqual(round_trip("I have 250 books.")[0], "I have 250 books.")
+        self.assertEqual(round_trip("I have 3.5 apples.")[0], "I have 3.5 apples.")
         self.assertEqual(round_trip("Three people are moving.")[0], "Three people are moving.")
 
     def test_colour_becomes_rgb_external(self):
