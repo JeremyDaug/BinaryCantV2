@@ -1,4 +1,4 @@
-"""Command line interface: python -m cant {encode,decode,dump,lexicon,distance,types}."""
+"""Command line interface: python -m cant {encode,decode,dump,explain,lexicon,distance,types,translate,serve}."""
 
 import argparse
 import re
@@ -118,8 +118,60 @@ def cmd_explain(a, lex):
         print(f"{w:016X}  {breakdown(w)}")
 
 
+def _load_cant(source, lex):
+    """Auto-detect: an existing file (binary .cant, hex text or gloss), else inline hex, else inline gloss."""
+    import os
+    if os.path.isfile(source):
+        with open(source, "rb") as f:
+            data = f.read()
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError:
+            return decode(from_bytes(data), file=None)
+        if "\x00" in text or (len(data) % 8 == 0 and data[:1] and data[0] >= 0x80 and not text.lstrip().startswith(("S", "Q", ";"))):
+            return decode(from_bytes(data), file=None)
+        source = text
+    digits = re.sub(r"\s|0x|,|_", "", source)
+    if digits and re.fullmatch(r"[0-9A-Fa-f]+", digits):
+        if len(digits) % 16:
+            raise CantError(f"hex input has {len(digits)} digits; need a multiple of 16 (64-bit words)")
+        return decode([int(digits[i:i + 16], 16) for i in range(0, len(digits), 16)], file=None)
+    return parse(source, lex)
+
+
+def cmd_translate(a, lex):
+    from .english import EnglishLexicon, cant2en, en2cant
+    en = EnglishLexicon(lex)
+    if a.direction == "en2cant":
+        text = " ".join(a.text) if a.text else sys.stdin.read()
+        conv, warnings = en2cant(text, en)
+        words = encode(conv, file=True)
+        if a.output:
+            with open(a.output, "wb") as f:
+                f.write(to_bytes(words))
+            print(f"wrote {len(words)} words ({8 * len(words)} bytes) to {a.output}", file=sys.stderr)
+        if a.format in ("all", "gloss"):
+            sys.stdout.write(format_conversation(conv, lex))
+        if a.format == "all":
+            print()
+        if a.format in ("all", "hex"):
+            print(" ".join(f"{w:016X}" for w in words))
+        if a.format == "all":
+            print(f"\n-> {cant2en(conv, en)}")
+        for w in warnings:
+            print(f"warning: {w}", file=sys.stderr)
+    else:
+        source = " ".join(a.text) if a.text else sys.stdin.read()
+        print(cant2en(_load_cant(source, lex), en))
+
+
+def cmd_serve(a, lex):
+    from .web.server import serve
+    serve(a.host, a.port, lex)
+
+
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="cant", description="Binary Cant V2.1 reference codec")
+    p = argparse.ArgumentParser(prog="cant", description="Binary Cant v2.2 reference codec, translator and UI")
     p.add_argument("--lexicon", help="path to lexicon.csv (default: repository lexicon.csv)")
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -151,6 +203,20 @@ def main(argv=None):
 
     t = sub.add_parser("types", help="list external types and operations")
     t.set_defaults(fn=cmd_types)
+
+    tr = sub.add_parser("translate", help="English <-> Cant (rule-based; see TRANSLATION.md)")
+    tr.add_argument("direction", choices=["en2cant", "cant2en"])
+    tr.add_argument("text", nargs="*", help="en2cant: English text; cant2en: hex words, gloss, or a file "
+                                            "(binary .cant, hex or gloss). Default: stdin")
+    tr.add_argument("-f", "--format", choices=["all", "gloss", "hex"], default="all",
+                    help="en2cant output: gloss + hex + round-trip English (default), or one of them")
+    tr.add_argument("-o", "--output", help="en2cant: also write the binary .cant file here")
+    tr.set_defaults(fn=cmd_translate)
+
+    sv = sub.add_parser("serve", help="start the local web UI (stdlib http.server)")
+    sv.add_argument("--port", type=int, default=8000)
+    sv.add_argument("--host", default="127.0.0.1", help="bind address (default 127.0.0.1)")
+    sv.set_defaults(fn=cmd_serve)
 
     a = p.parse_args(argv)
     try:

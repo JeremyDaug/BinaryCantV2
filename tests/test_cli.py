@@ -48,3 +48,34 @@ class CLI(unittest.TestCase):
         r = run("types")
         self.assertIn("0x7A  char", r.stdout)
         self.assertIn("IF_ELSE", r.stdout)
+
+
+class Translate(unittest.TestCase):
+    def test_en2cant_prints_gloss_hex_and_english(self):
+        r = run("translate", "en2cant", "Where do you live?")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("QUERY<Location", r.stdout)
+        self.assertIn("4021000000000003", r.stdout)
+        self.assertIn("-> Where do you live?", r.stdout)
+
+    def test_en2cant_warning_on_stderr(self):
+        r = run("translate", "en2cant", "-f", "hex", "The glorp sleeps.")
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("glorp", r.stderr)
+
+    def test_cant2en_hex_gloss_and_files(self):
+        hx = run("translate", "en2cant", "-f", "hex", "I have five friends.").stdout.strip()
+        self.assertEqual(run("translate", "cant2en", hx).stdout.strip(), "I have five friends.")
+        self.assertEqual(run("translate", "cant2en", "STATEMENT<Assertion>{ null.act<V,Present> }").stdout.strip(),
+                         "Nothing happens.")
+        self.assertEqual(run("translate", "cant2en", "examples/dialogue.cant").stdout.strip().splitlines()[-1],
+                         "Speaker 2: That is a tool.")
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "m.cant")
+            run("translate", "en2cant", "-o", out, "The cat sleeps.")
+            self.assertEqual(run("translate", "cant2en", out).stdout.strip(), "The cat sleeps.")
+
+    def test_cant2en_bad_input(self):
+        r = run("translate", "cant2en", "123")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("multiple of 16", r.stderr)

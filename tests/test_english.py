@@ -77,6 +77,14 @@ ROUND_TRIPS = [
     ("Yesterday I ran quickly.", "I ran quickly yesterday."),
     ("Will you come to the city tomorrow?", None),
     ("Nothing is happening.", None),
+    ("Did you see my two dogs yesterday?", None),
+    ("These three cats are small.", None),
+    ("All my friends are here.", None),
+    ("Which two dogs are big?", None),
+    ("My friend's house is big.", None),
+    ("My old friend's big house is red.", None),
+    ("The teacher's dog sleeps.", None),
+    ("Your two brothers' cats are here.", "Your two siblings' cats are here."),
 ]
 
 

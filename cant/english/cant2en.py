@@ -112,11 +112,12 @@ class Renderer:
             if u.role in (M, FU) or self.is_genitive(u):
                 tgt = self.link_target(u, by_idx) or head
                 if tgt is not None:
+                    u.attached = True
                     if self.is_genitive(u):
                         tgt.possessor = u
+                        head = u      # later modifiers/genitives describe the possessor: my old friend's house
                     else:
                         tgt.mods.append(u)
-                    u.attached = True
                 continue
             if u.role in (S, O, T) and u.g.link:
                 tgt = self.link_target(u, by_idx)
@@ -236,25 +237,39 @@ class Renderer:
         return (adv + " " if adv else "") + pole
 
     def determiner(self, u, word, question_which=False):
+        """Composes head determiner (which / possessor / demonstrative), quantity and number:
+        'my two dogs', 'these three cats', 'all my friends', 'which two dogs'."""
+        head = None
         if question_which:
-            return "which"
-        if u.possessor is not None:
+            head = "which"
+        elif u.possessor is not None:
             p = u.possessor
             if self.is_pronoun(p):
-                return self.pron_form(p, "poss")
-            return self.np(p, "obj") + "'s"
-        for a in u.appos:
-            if a.kind == "lex":
-                e = self.en.render_entry(a.root, a.cat, None, ("dem",))
-                if e is not None:
-                    return e.forms.get("pl", e.english) if u.g.plural == 2 else e.english
+                head = self.pron_form(p, "poss")
+            else:
+                owner = self.np(p, "obj")
+                head = owner + ("'" if owner.endswith("s") and p.g.plural in (2, 3) else "'s")
+        else:
+            for a in u.appos:
+                if a.kind == "lex":
+                    e = self.en.render_entry(a.root, a.cat, None, ("dem",))
+                    if e is not None:
+                        head = e.forms.get("pl", e.english) if u.g.plural == 2 or u.number is not None else e.english
+                        break
+        quant = None
         for m in u.mods:
             if m.kind == "lex" and m.root == self.amount:
                 e = self.en.render_entry(m.root, m.cat, m.g, ("q",))
                 if e is not None:
-                    return e.english
-        if u.number is not None:
-            return u.number.text
+                    quant = e.english
+                    break
+        num = u.number.text if u.number is not None else None
+        if head is not None:
+            return " ".join(x for x in ["all" if quant == "all" else None, head, num] if x)
+        if quant is not None:
+            return quant
+        if num is not None:
+            return num
         if u.g.det:
             return "the"
         if u.g.plural == 1:

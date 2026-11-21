@@ -27,7 +27,14 @@ DOMAINS = {
     4: "artifacts (made things)",
     5: "arts (music, performance)",
     6: "qualities (magnitudes, measures)",
-    7: "mind (affect, hedonic states)",
+    7: "mind (affect, cognition, hedonic states)",
+    8: "motion and transfer",
+    9: "making and change",
+    10: "places and nature",
+    11: "time",
+    12: "quantity",
+    13: "spatial relations",
+    14: "events and manner",
     15: "totality (everything)",
 }
 

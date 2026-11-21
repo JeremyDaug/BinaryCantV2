@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binary Cant v2.2</title>
+<style>
+:root{
+  --bg:#0d1014; --panel:#151a21; --panel2:#1b222b; --line:#2a333f; --fg:#d6dde6; --dim:#8593a3;
+  --acc:#4fd1a5; --acc2:#7aa2ff; --err:#ff6b6b; --warn:#f2c14e;
+  --c-class:#6b7280; --c-role:#f472b6; --c-tense:#60a5fa; --c-progress:#38bdf8; --c-recur:#22d3ee;
+  --c-degree:#fbbf24; --c-emph:#fb923c; --c-det:#f87171; --c-plural:#a78bfa; --c-link:#4ade80; --c-offset:#86efac;
+  --c-rsv:#374151; --c-domain:#ef4444; --c-cluster:#f59e0b; --c-concept:#10b981; --c-cat:#8b5cf6;
+  --c-subtype:#f472b6; --c-affection:#fbbf24; --c-evidence:#60a5fa; --c-count:#4ade80; --c-span:#22d3ee;
+  --c-type:#f472b6; --c-payload:#60a5fa; --c-opcode:#fbbf24; --c-operand:#10b981; --c-data:#4b5563;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+header{display:flex;align-items:center;gap:18px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:16px;margin:0;letter-spacing:.08em;color:var(--acc)}
+header h1 span{color:var(--dim);font-weight:normal}
+nav{display:flex;gap:4px}
+nav button{background:none;border:1px solid transparent;color:var(--dim);padding:6px 14px;border-radius:6px;cursor:pointer;font:inherit}
+nav button:hover{color:var(--fg)}
+nav button.on{color:var(--fg);border-color:var(--line);background:var(--panel2)}
+#meta{margin-left:auto;color:var(--dim);font-size:12px}
+main{max-width:1280px;margin:0 auto;padding:20px 24px 60px}
+section{display:none} section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.card h2{font-size:13px;margin:0 0 10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:normal}
+textarea,input,select{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--acc2)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+button.go{background:var(--acc);color:#04130e;border:0;border-radius:6px;padding:8px 16px;font:inherit;font-weight:bold;cursor:pointer}
+button.alt{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+button.go:hover{filter:brightness(1.1)} button.alt:hover{border-color:var(--acc2)}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;min-height:40px}
+.english{font-size:17px;color:#fff;font-family:system-ui,sans-serif;padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--line);min-height:44px}
+.err{color:var(--err);margin-top:8px;white-space:pre-wrap}
+.warn{color:var(--warn);font-size:12px;margin-top:6px}
+.warn div::before{content:"⚠ "}
+.dim{color:var(--dim)} .small{font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top;white-space:nowrap}
+th{color:var(--dim);font-weight:normal;position:sticky;top:0;background:var(--panel)}
+tr:hover td{background:var(--panel2)}
+td.g{white-space:normal;min-width:180px}
+.scroll{overflow:auto;max-height:520px}
+.bits{display:flex;flex-wrap:nowrap;gap:2px;margin:3px 0 2px;overflow-x:auto}
+.seg{display:flex;flex-direction:column;align-items:center;border-radius:3px;padding:1px 2px;cursor:default}
+.seg b{font-weight:normal;letter-spacing:1px;color:#0b0e12;font-size:12px}
+.seg i{font-style:normal;font-size:9px;color:#0b0e12;opacity:.75}
+.bitrow{padding:6px 0;border-bottom:1px dashed var(--line)}
+.bitrow .lbl{font-size:12px;color:var(--dim)} .bitrow .lbl span{color:var(--fg)}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 8px;margin:1px 2px;font-size:11px;color:var(--dim)}
+.pill.p{border-color:#5a4a1a;color:var(--warn)}
+.big{font-size:40px;color:var(--acc);line-height:1}
+.dbits{display:flex;gap:1px;flex-wrap:wrap;margin:6px 0}
+.dbits span{width:18px;text-align:center;border-radius:3px;background:var(--panel2);font-size:12px}
+.dbits span.x{background:var(--err);color:#000}
+.dbits span.gap{width:8px;background:none}
+kbd{border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:11px;color:var(--dim)}
+a{color:var(--acc2)}
+.examples button{margin:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>BINARY&nbsp;CANT <span>v2.2</span></h1>
+  <nav>
+    <button data-tab="translate" class="on">Translate</button>
+    <button data-tab="codec">Encode / Decode</button>
+    <button data-tab="lexicon">Lexicon</button>
+    <button data-tab="distance">Distance</button>
+  </nav>
+  <div id="meta"></div>
+</header>
+<main>
+
+<!-- ============================== TRANSLATE ============================== -->
+<section id="translate" class="on">
+  <div class="grid2">
+    <div class="card">
+      <h2>English → Cant</h2>
+      <textarea id="en-in" placeholder="Type English…  (Ctrl+Enter to translate)">Did you see my two red dogs in the garden yesterday?</textarea>
+      <div class="row examples small dim" id="en-examples"></div>
+      <div class="row"><button class="go" id="en-go">Translate</button><span class="dim small">rule-based · unknown words become <code>text</code> externals</span></div>
+      <div class="warn" id="en-warn"></div><div class="err" id="en-err"></div>
+    </div>
+    <div class="card">
+      <h2>Cant → English</h2>
+      <textarea id="ce-in" placeholder="Paste gloss or hex words…"></textarea>
+      <div class="row"><button class="go" id="ce-go">Render English</button><button class="alt" id="ce-from-left">← use result</button></div>
+      <div class="err" id="ce-err"></div>
+      <div class="english" id="ce-out" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div id="en-result" style="display:none">
+    <div class="card"><h2>Round-trip English</h2><div class="english" id="en-back"></div></div>
+    <div class="grid2">
+      <div class="card"><h2>Gloss</h2><pre id="en-gloss"></pre></div>
+      <div class="card"><h2>Hex <span class="dim small" id="en-nwords"></span></h2><pre id="en-hex"></pre>
+        <div class="row"><button class="alt" id="en-dl">Download .cant</button><button class="alt" id="en-copy">Copy hex</button></div></div>
+    </div>
+    <div class="card"><h2>Per-word fields</h2><div class="scroll"><table id="en-table"></table></div></div>
+    <div class="card"><h2>64-bit view <span class="dim small">hover a segment for its field</span></h2><div id="en-bits"></div><div id="legend" class="row small"></div></div>
+  </div>
+</section>
+
+<!-- ============================== CODEC ============================== -->
+<section id="codec">
+  <div class="grid2">
+    <div class="card">
+      <h2>Gloss → binary</h2>
+      <textarea id="gl-in" style="min-height:200px">STATEMENT<Assertion>{
+    other.obj<S>
+    possession.rel<R>
+    cover.obj<O,Specific>
+    cover.obj<S,Specific>
+    rgb(#FF0000)
+    TO_VERB<Present>
+}</textarea>
+      <div class="row"><button class="go" id="gl-go">Encode</button>
+        <label class="small dim"><input type="checkbox" id="gl-bare" style="width:auto"> bare stream (no file header)</label></div>
+      <div class="err" id="gl-err"></div>
+    </div>
+    <div class="card">
+      <h2>Hex / .cant → gloss</h2>
+      <textarea id="hx-in" style="min-height:200px" placeholder="Hex words (whitespace optional)"></textarea>
+      <div class="row"><button class="go" id="hx-go">Decode</button>
+        <label class="alt" style="cursor:pointer">Upload .cant<input type="file" id="hx-file" style="display:none"></label>
+        <button class="alt" id="hx-dl">Download .cant</button></div>
+      <div class="err" id="hx-err"></div>
+    </div>
+  </div>
+  <div id="cd-result" style="display:none">
+    <div class="card"><h2>English</h2><div class="english" id="cd-en"></div></div>
+    <div class="grid2">
+      <div class="card"><h2>Canonical gloss</h2><pre id="cd-gloss"></pre></div>
+      <div class="card"><h2>Words</h2><div class="scroll"><table id="cd-table"></table></div></div>
+    </div>
+    <div class="card"><h2>64-bit view</h2><div id="cd-bits"></div></div>
+  </div>
+</section>
+
+<!-- ============================== LEXICON ============================== -->
+<section id="lexicon">
+  <div class="card">
+    <div class="row" style="margin-top:0">
+      <input id="lx-q" placeholder="Search key, sense or English word…" style="flex:3">
+      <select id="lx-dom" style="flex:2"><option value="all">all domains</option></select>
+      <select id="lx-cat" style="flex:1"><option value="all">any category</option><option>obj</option><option>rel</option><option>act</option><option>loc</option></select>
+    </div>
+    <div class="small dim" id="lx-count" style="margin-top:8px"></div>
+  </div>
+  <div class="card"><div class="scroll" style="max-height:70vh"><table id="lx-table"></table></div></div>
+</section>
+
+<!-- ============================== DISTANCE ============================== -->
+<section id="distance">
+  <div class="card">
+    <h2>Semantic Hamming distance</h2>
+    <div class="row" style="margin-top:0">
+      <input id="ds-a" value="cat" style="flex:1" placeholder="cat, dog.obj, 0x…">
+      <input id="ds-b" value="dog" style="flex:1">
+      <button class="go" id="ds-go">Compare</button>
+    </div>
+    <div class="row small dim examples" id="ds-examples"></div>
+    <div class="err" id="ds-err"></div>
+  </div>
+  <div class="card" id="ds-result" style="display:none">
+    <div class="row" style="margin-top:0;gap:30px;align-items:flex-end">
+      <div><div class="big" id="ds-h"></div><div class="dim small">bits differ / 32</div></div>
+      <div><div id="ds-tree" style="font-size:16px"></div><div class="dim small">tree distance</div></div>
+    </div>
+    <div id="ds-words" style="margin-top:14px"></div>
+    <div class="small dim" style="margin-top:10px">Low 32 bits: domain (8, Reed–Muller codeword) · cluster (8, RM) · concept (14, Gray) · category (2). Red = differing bit.</div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+async function api(path, body){
+  const r = await fetch(path, body === undefined ? {} : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+// tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button, section").forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); $("#" + b.dataset.tab).classList.add("on");
+  if(b.dataset.tab === "lexicon" && !lexLoaded) loadLexicon();
+  location.hash = b.dataset.tab;
+});
+if(location.hash){ const b = document.querySelector(`nav button[data-tab="${location.hash.slice(1)}"]`); if(b) b.click(); }
+
+const SEG_COLOR = n => `var(--c-${n}, #888)`;
+function bitRow(w){
+  const segs = w.segments.map(s => `<div class="seg" style="background:${SEG_COLOR(s.name)}" title="${esc(s.name)} = ${s.bits} (${parseInt(s.bits,2)})"><b>${s.bits}</b><i>${esc(s.name)}</i></div>`).join("");
+  return `<div class="bitrow"><div class="lbl">${String(w.index).padStart(3)} <span>${w.hex}</span> · ${esc(w.gloss)} <span class="dim">— ${esc(w.note)}</span></div><div class="bits">${segs}</div></div>`;
+}
+const LEX_COLS = ["role","tense","progression","recurrence","degree","emphasis","determinative","plurality","link","domain","cluster","concept","category"];
+function fieldTable(words){
+  let h = `<tr><th>#</th><th>hex</th><th>gloss</th>${LEX_COLS.map(c=>`<th>${c}</th>`).join("")}<th>other</th></tr>`;
+  for(const w of words){
+    const f = w.fields, lex = f.class === "lexical";
+    const cells = LEX_COLS.map(c => {
+      if(!lex) return "<td></td>";
+      let v = f[c]; if(v === true) v = "✓"; if(v === false || v === null) v = ""; 
+      if(c === "link" && v !== "") v = "^" + v;
+      const quiet = ["Timeless","Unprogressed","NonRecurring","Unspecified","Unnumbered"].includes(v);
+      return `<td class="${quiet?"dim":""}">${esc(v)}</td>`;
+    }).join("");
+    const other = lex ? "" : Object.entries(f).map(([k,v]) => `${k}=${esc(v)}`).join(" ");
+    h += `<tr><td class="dim">${w.index}</td><td>${w.hex}</td><td class="g" style="padding-left:${7+w.depth*12}px">${esc(w.gloss)}</td>${cells}<td class="dim">${other}</td></tr>`;
+  }
+  return h;
+}
+function legend(){
+  const names = ["class","role","tense","progress","recur","degree","emph","det","plural","link","offset","domain","cluster","concept","cat","subtype","affection","evidence","count","span","type","opcode","operand","payload"];
+  $("#legend").innerHTML = names.map(n => `<span class="pill" style="border-color:${SEG_COLOR(n)};color:${SEG_COLOR(n)}">${n}</span>`).join("");
+}
+function download(b64, name){
+  const bin = atob(b64), u = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([u], {type:"application/octet-stream"}));
+  a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ------------------------------------------------------------ translate
+let lastEn = null;
+const EXAMPLES = ["The cat sleeps.","Will you come to the city tomorrow?","My friend's house is big.","Three people are working in the field.",
+  "Where do you live?","Give me the red ball.","Reportedly, the king is dead.","If you are home, I will be home.","The glorp eats bread."];
+$("#en-examples").innerHTML = "try: " + EXAMPLES.map(e => `<button class="alt small" style="padding:2px 8px">${esc(e)}</button>`).join("");
+$("#en-examples").querySelectorAll("button").forEach(b => b.onclick = () => { $("#en-in").value = b.textContent; runEn(); });
+async function runEn(){
+  $("#en-err").textContent = ""; $("#en-warn").innerHTML = "";
+  try{
+    const r = await api("/api/en2cant", {text: $("#en-in").value});
+    lastEn = r;
+    $("#en-result").style.display = "";
+    $("#en-back").textContent = r.english;
+    $("#en-gloss").textContent = r.gloss;
+    $("#en-hex").textContent = r.hex.join("\n");
+    $("#en-nwords").textContent = `${r.hex.length} words · ${r.hex.length*8} bytes`;
+    $("#en-warn").innerHTML = r.warnings.map(w => `<div>${esc(w)}</div>`).join("");
+    $("#en-table").innerHTML = fieldTable(r.words);
+    $("#en-bits").innerHTML = r.words.map(bitRow).join("");
+  }catch(e){ $("#en-err").textContent = e.message; }
+}
+$("#en-go").onclick = runEn;
+$("#en-in").addEventListener("keydown", e => { if(e.key === "Enter" && (e.ctrlKey || e.metaKey)) runEn(); });
+$("#en-dl").onclick = () => lastEn && download(lastEn.base64, "message.cant");
+$("#en-copy").onclick = () => lastEn && navigator.clipboard && navigator.clipboard.writeText(lastEn.hex.join(" "));
+$("#ce-from-left").onclick = () => { if(lastEn){ $("#ce-in").value = lastEn.hex.join(" "); runCe(); } };
+async function runCe(){
+  $("#ce-err").textContent = "";
+  try{ const r = await api("/api/cant2en", {text: $("#ce-in").value}); $("#ce-out").textContent = r.english; }
+  catch(e){ $("#ce-err").textContent = e.message; $("#ce-out").textContent = ""; }
+}
+$("#ce-go").onclick = runCe;
+
+// ------------------------------------------------------------ codec
+let lastCd = null;
+function showCd(r){
+  lastCd = r;
+  $("#cd-result").style.display = "";
+  $("#cd-en").textContent = r.english || "";
+  $("#cd-gloss").textContent = r.gloss;
+  $("#cd-table").innerHTML = `<tr><th>#</th><th>hex</th><th>gloss</th><th>meaning</th></tr>` +
+    r.words.map(w => `<tr><td class="dim">${w.index}</td><td>${w.hex}</td><td class="g" style="padding-left:${7+w.depth*12}px">${esc(w.gloss)}</td><td class="g dim">${esc(w.note)}</td></tr>`).join("");
+  $("#cd-bits").innerHTML = r.words.map(bitRow).join("");
+}
+async function runGl(){
+  $("#gl-err").textContent = "";
+  try{
+    const r = await api("/api/encode", {gloss: $("#gl-in").value, bare: $("#gl-bare").checked});
+    const e = await api("/api/cant2en", {gloss: $("#gl-in").value}).catch(() => ({english:""}));
+    r.english = e.english; $("#hx-in").value = r.hex.join("\n"); showCd(r);
+  }catch(e){ $("#gl-err").textContent = e.message; }
+}
+async function runHx(body){
+  $("#hx-err").textContent = "";
+  try{ const r = await api("/api/decode", body || {hex: $("#hx-in").value}); $("#gl-in").value = r.gloss; if(body) $("#hx-in").value = r.hex.join("\n"); showCd(r); }
+  catch(e){ $("#hx-err").textContent = e.message; }
+}
+$("#gl-go").onclick = runGl; $("#hx-go").onclick = () => runHx();
+let glTimer; $("#gl-in").addEventListener("input", () => { clearTimeout(glTimer); glTimer = setTimeout(async () => {
+  try{ await api("/api/encode", {gloss: $("#gl-in").value}); $("#gl-err").textContent = ""; } catch(e){ $("#gl-err").textContent = e.message; } }, 350); });
+$("#hx-file").onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { const b = new Uint8Array(rd.result); let s = ""; for(const x of b) s += String.fromCharCode(x); runHx({base64: btoa(s)}); };
+  rd.readAsArrayBuffer(f); e.target.value = "";
+};
+$("#hx-dl").onclick = () => lastCd ? download(lastCd.base64, "message.cant") : ($("#hx-err").textContent = "encode or decode something first");
+
+// ------------------------------------------------------------ lexicon
+let lexLoaded = false, lxTimer;
+async function loadLexicon(){
+  lexLoaded = true;
+  const q = {q: $("#lx-q").value, domain: $("#lx-dom").value, category: $("#lx-cat").value};
+  try{
+    const r = await api("/api/lexicon?" + new URLSearchParams(q));
+    if($("#lx-dom").options.length === 1)
+      for(const [k,v] of Object.entries(r.domains)) $("#lx-dom").insertAdjacentHTML("beforeend", `<option value="${k}">${k} · ${esc(v)}</option>`);
+    $("#lx-count").textContent = `${r.count} of ${r.total} roots`;
+    $("#lx-table").innerHTML = `<tr><th>key</th><th>root</th><th>d/c/k</th><th>obj</th><th>rel</th><th>act</th><th>loc</th><th>English</th></tr>` +
+      r.entries.map(e => `<tr><td>${esc(e.key)}${e.source.includes("proposed") ? ' <span class="pill p">proposed</span>' : ""}</td><td class="dim">${e.root}</td><td class="dim">${e.domain}/${e.cluster}/${e.concept}</td>` +
+        ["obj","rel","act","loc"].map(c => `<td class="g">${esc(e.senses[c] || "")}</td>`).join("") +
+        `<td class="g dim">${esc(e.english.join(", "))}</td></tr>`).join("");
+  }catch(e){ $("#lx-count").textContent = e.message; }
+}
+["#lx-q","#lx-dom","#lx-cat"].forEach(s => $(s).addEventListener("input", () => { clearTimeout(lxTimer); lxTimer = setTimeout(loadLexicon, 150); }));
+
+// ------------------------------------------------------------ distance
+const DS_EX = [["cat","dog"],["cat","bird"],["mother","father"],["happy","sad"],["dog","house"],["go.act","come"]];
+$("#ds-examples").innerHTML = "try: " + DS_EX.map(([a,b]) => `<button class="alt small" style="padding:2px 8px" data-a="${a}" data-b="${b}">${a} / ${b}</button>`).join("");
+$("#ds-examples").querySelectorAll("button").forEach(b => b.onclick = () => { $("#ds-a").value = b.dataset.a; $("#ds-b").value = b.dataset.b; runDs(); });
+function dbits(bits, other){
+  let h = ""; for(let i=0;i<32;i++){ if(i===8||i===16||i===30) h += '<span class="gap"></span>'; h += `<span class="${bits[i]!==other[i]?"x":""}">${bits[i]}</span>`; } return h;
+}
+async function runDs(){
+  $("#ds-err").textContent = "";
+  try{
+    const r = await api("/api/distance", {a: $("#ds-a").value, b: $("#ds-b").value});
+    $("#ds-result").style.display = "";
+    $("#ds-h").textContent = r.hamming; $("#ds-tree").textContent = `${r.tree} · ${r.tree_label}`;
+    const f = r.fields;
+    $("#ds-words").innerHTML = [r.a, r.b].map((w,i) => `<div style="margin-bottom:10px"><b>${esc(w.name)}</b> <span class="dim">${w.hex} — ${esc(w.gloss)} · d${w.domain}/c${w.cluster}/k${w.concept}</span><div class="dbits">${dbits(w.bits, (i?r.a:r.b).bits)}</div></div>`).join("") +
+      `<div class="small">differing bits: ${r.differing_bits.length ? r.differing_bits.join(", ") : "none"} <span class="dim">(domain ${f.domain.length} · cluster ${f.cluster.length} · concept ${f.concept.length} · category ${f.category.length})</span></div>`;
+  }catch(e){ $("#ds-err").textContent = e.message; $("#ds-result").style.display = "none"; }
+}
+$("#ds-go").onclick = runDs;
+["#ds-a","#ds-b"].forEach(s => $(s).addEventListener("keydown", e => { if(e.key === "Enter") runDs(); }));
+
+api("/api/meta").then(m => $("#meta").textContent = `${m.roots} roots · ${m.english_entries} English entries`).catch(()=>{});
+legend(); runEn();
+</script>
+</body>
+</html>

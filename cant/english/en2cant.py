@@ -71,7 +71,7 @@ def tokenize(sentence):
         punct = m.group(1)[-1]
         s = s[:m.start()]
     toks = []
-    for raw in re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?|\d+|,|#[0-9A-Fa-f]{6}", s):
+    for raw in re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?(?<=s)'|[A-Za-z]+(?:'[A-Za-z]+)?|\d+|,|#[0-9A-Fa-f]{6}", s):
         low = raw.lower()
         if low in CONTRACTIONS:
             for part in CONTRACTIONS[low].split():
@@ -179,7 +179,10 @@ class Parser:
                 own = NP()
                 own.kind, own.entry, own.root, own.cat = "pron", e, e.root, e.cat
                 own.plural = kind == "plposs"
-                np2.possessor = own
+                inner = np2                       # "my friend's house": 'my' owns the innermost possessor
+                while inner.possessor is not None:
+                    inner = inner.possessor
+                inner.possessor = own
                 return self._possessive_tail(toks, np2, j)
             np.kind, np.entry, np.root, np.cat = "pron", e, e.root, e.cat
             np.plural = kind in ("pl", "plobj") or (e.english == "they")
@@ -203,6 +206,11 @@ class Parser:
             e, _ = self.L(t, ("q",))[0]
             np.quant = e.flags["degree"]
             i += 1
+            if i < n and (toks[i].w in ARTICLES or any(k in ("poss", "plposs") for _, k in self.L(toks[i], ("pron",)))):
+                np2, j = self.parse_np(toks, i)      # "all my friends", "all the dogs"
+                if np2 is not None:
+                    np2.quant = np.quant
+                    return np2, j
         if i < n and morph.number_value(toks[i].w) is not None:
             v = morph.number_value(toks[i].w)
             i += 1
@@ -268,7 +276,10 @@ class Parser:
             owned, j = self.parse_np(toks, i + 1)
             if owned is None:
                 raise ParseError("possessive 's must be followed by a noun")
-            owned.possessor = np
+            inner = owned                      # "Mary's friend's house": Mary owns the friend
+            while inner.possessor is not None:
+                inner = inner.possessor
+            inner.possessor = np
             return owned, j
         return np, i
 
@@ -797,7 +808,8 @@ def en2cant(text, en=None):
             conv.items.append(Sentence(statement, subtype, affection, ev, b.items))
         except ParseError as e:
             p.warn(f"could not parse \"{sent}\" ({e}); kept the whole sentence as text")
-            payload, conts = EXT["text"].encode(['"' + sent.replace('"', '\\"') + '"'])
+            raw = sent.strip().rstrip(".?!").strip()
+            payload, conts = EXT["text"].encode(['"' + raw.replace('"', '\\"') + '"'])
             items = [External(EXT["text"].code, payload, conts),
                      Operation(OPS["TO_TOPIC"], 0)]
             conv.items.append(Sentence(True, 0, 0, 0, items))
