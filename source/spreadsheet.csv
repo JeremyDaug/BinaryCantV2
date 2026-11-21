@@ -1,0 +1,27 @@
+plurality,word_bits,object_abstract_state(00),relation(01),action(10),location(11)
+,0b0000 0000 0000,manipulator,manipulator,to manipulate,at manipulator
+,0b0000 0000 0001,mover,mover,to move,by mover
+,0b0000 0000 0010,auditory communicator,speaker,speaking,tongue
+,,auditory listener,listener,listening,ears
+,,sustenance orifice,S eats O,,
+,,contact sensor,,,
+,,olfactory sensor,,,
+,,waste orifice,,,
+,,controller,,,
+,,power pump,,,
+,,energy storage,,,
+,,uncontrolled,,,
+,,sophont,,,
+,,animal,,,
+,,interface,,,
+,,inanimate object,,,
+,,nothing,,,
+,,parent,parent,parenting,parent's home
+,,mentor,,,
+,,cover(clothing),,,
+,,existence,connected,exists,universe
+,,instrument,,,
+,,tool,,,
+,,music,,,
+,,musician,,,
+,,band,,,
