@@ -508,7 +508,7 @@ QUERY<Verb,Honest,Direct>{
 The doc's V1 words were `0x60400001` (header) and `0x1C000002` (word). The word half carries
 over *unchanged*: `0x1C…` = Verb, Present, and root 0 category action = *Nothing (happening)*.
 The doc's header used *Dishonest*. V2.1 uses Honest, because this is plainly a neutral
-statement (see DECISIONS D-07).
+statement (see DECISIONS D-11).
 
 ```cant
 STATEMENT<Assertion,Honest,Direct>{

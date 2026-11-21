@@ -156,7 +156,7 @@ author are at the end, each with a recommendation. IDs (D-nn) are referenced fro
 **D-22 · Ambiguous spreadsheet entries.**
 * *uncontrolled* has no gloss. V2.1 reads it as "thing without a controller" (beings
   domain). Flagged in the lexicon notes.
-* *instrument* could be musical or a tool. It is placed with *tool* (§9.4 limits).
+* *instrument* could be musical or a tool. It is placed with *tool* (SPEC §9, "one parent per concept").
 
 ## D. Externals and operations
 
