@@ -138,6 +138,8 @@ tooth,n,tooth.obj,,pl=teeth,yes
 bite,v,tooth.act,,past=bit;pp=bitten;ing=biting,yes
 life,n,life.obj,,pl=lives,yes
 live,v,life.act,,,yes
+alive,a,life.obj,degree=Large,,yes
+dead,a,life.obj,degree=Small,,yes
 death,n,death.obj,,,yes
 die,v,death.act,,ing=dying,yes
 sleep,v,sleep.act,,past=slept;pp=slept,yes

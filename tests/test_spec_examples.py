@@ -9,7 +9,8 @@ from tests.helpers import LEX, ROOT, enc
 
 
 def spec_examples():
-    text = open(os.path.join(ROOT, "SPEC.md"), encoding="utf-8").read()
+    with open(os.path.join(ROOT, "SPEC.md"), encoding="utf-8") as fh:
+        text = fh.read()
     pairs = re.findall(r"```cant\n(.*?)```\n```hex\n(.*?)```", text, re.S)
     return [(g, [int(h, 16) for h in hx.split()]) for g, hx in pairs]
 
@@ -38,7 +39,8 @@ class SpecExamples(unittest.TestCase):
         d = os.path.join(ROOT, "examples")
         for name in os.listdir(d):
             if name.endswith(".cant"):
-                text = open(os.path.join(d, name), encoding="utf-8").read()
+                with open(os.path.join(d, name), encoding="utf-8") as fh:
+            text = fh.read()
                 enc(text, file=text.startswith("; file"))
 
 
