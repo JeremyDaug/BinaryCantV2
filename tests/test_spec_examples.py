@@ -40,7 +40,7 @@ class SpecExamples(unittest.TestCase):
         for name in os.listdir(d):
             if name.endswith(".cant"):
                 with open(os.path.join(d, name), encoding="utf-8") as fh:
-            text = fh.read()
+                    text = fh.read()
                 enc(text, file=text.startswith("; file"))
 
 
