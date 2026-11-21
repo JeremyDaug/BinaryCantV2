@@ -248,15 +248,90 @@ author are at the end, each with a recommendation. IDs (D-nn) are referenced fro
 | numpy uint64 | Pure-stdlib Python ints (no dependency) |
 | `Flag_Groups` table approach | Same idea: one constants module (`cant/fields.py`) is the single source of truth |
 
+## G. v2.2: language conventions, lexicon and tooling
+
+None of these change a bit. All are conventions on top of V2.1 (SPEC §14, C-1 … C-18).
+
+**D-35 · The version byte stays `0x21`.**
+* v2.2 adds roots and conventions but no layout change.
+* **Decision:** the file version names the *wire layout*. Bumping it would make V2.1 decoders
+  reject files they can read perfectly well. Lexicon versioning is a separate problem (ROADMAP).
+
+**D-36 · Lexicon growth keeps every existing root ID.**
+* SPEC hex, examples and any stored files depend on root IDs.
+* **Decision:** new roots only fill new concept slots or new clusters and domains.
+  `tools/build_lexicon_v22.py` regenerates the v2.2 rows from the untouched base rows. New
+  rows are `source = proposed-v2.2` until the author reviews them.
+
+**D-37 · Scalar qualities use degree, not antonym roots (C-1).**
+* The doc's "one meaning per word" plus the degree field (None … Total) make *small* =
+  `size<Small>` and *big* = `size<Large>`. Antonym roots would duplicate the axis and waste
+  locality: big and small *should* be 0 bits apart in the semantic half.
+* The 2018 mapping did the same: run = `mover.act<Large>`, tall = `height<Large>`.
+
+**D-38 · Predicates are object-as-verb (C-2), and location-as-verb means "be at" (C-14).**
+* The doc's role × category table already lets an object word act as the verb ("to be X").
+  So no copula root is needed, and "is big" costs one word.
+* "Be at" for `.loc<V>` was the default offered to the author for v2.2 (no objection). Motion
+  uses a motion verb + InProgress + `toward.rel`.
+
+**D-39 · Genitive = non-relation word in the Relation role (C-3).**
+* The alternatives were a dedicated `possession.rel` per noun phrase (2 words, and it collides
+  with "have"), or a new grammar flag (no bits free in the high half).
+* A Relation-role word whose category is not `rel` has no other meaning in V2.1, so the
+  combination is free. It is one word per possessor and chains naturally
+  ("my friend's house" = 3 words).
+
+**D-40 · Negation = verb degree None (C-4).**
+* The doc defines degree None as "not at all". Applied to a verb it is negation, for free.
+  When degree is already used (e.g. "is not very big"), a following `null.act<M>` negates.
+
+**D-41 · Prepositions are relations linked to their object (C-5), state verbs are unlinked relations (C-6).**
+* This keeps the doc's Jim/Carol/Jack binding rule (Subjects × preceding Objects) for "have",
+  "want", "know", and uses the V2.1 link offset for PPs, so "in the garden" binds to *garden*
+  rather than to every object.
+
+**D-42 · Questions and imperatives use only existing header subtypes (C-11, C-12).**
+* The 8 query subtypes map directly onto who / what / yes-no / when / where / why / how / which.
+* Imperative is the existing statement subtype. The addressee is implicit, which matches
+  English and saves a word.
+
+**D-43 · Fiction is a scope, not a header bit (C-15; resolves Q-1).**
+* Accepted default: a Narrator-level sentence with Topic `story.obj` wraps the fiction. It
+  costs one sentence header and one word per fictional passage, not one bit in every header.
+
+**D-44 · Direction stays yaw-pitch-roll (C-16; resolves Q-5).** Accepted default; no change to `dir()`.
+
+**D-45 · Gender neutrality in the lexicon.**
+* The doc asks for neutral pronouns, so he/she/it/they all map to `other.obj`. Kin terms map
+  to neutral roots (parent, sibling, child). English output therefore says "they" and
+  "parent". If gender ever matters, a modifier word (`male.obj<M>`) can carry it. That is
+  explicit content, not grammar.
+
+**D-46 · The translator degrades to `text`, never fails (C-17).**
+* An English sentence the parser cannot handle becomes `text(sentence) TO_TOPIC` with a
+  warning. Unknown words become `text(word)` + a role cast. Output is always a valid Cant
+  stream, and the loss is visible.
+
+**D-47 · The English mapping is a separate file.**
+* `cant/english/en_lexicon.csv` maps English forms to `root.cat` + grammar flags. `lexicon.csv`
+  stays language-neutral (the interlingua), and another natural language would get its own
+  mapping file.
+
+**D-48 · Web UI is stdlib-only and local.**
+* `http.server` + one inline HTML file: no dependencies, no CDN, binds 127.0.0.1 by default.
+  The JSON API is a thin layer over the same functions the CLI uses, so the CLI, tests and UI
+  cannot drift apart.
+
 ## Open questions for the author
 
 | # | Question | Recommendation |
 |---|---|---|
-| **Q-1** | V2.0 dropped V1's **Fact vs Fiction** statement subtypes. Should fiction be markable? | Yes, but not as a subtype. Mark it as a scope: put fiction inside a Narrator-level sentence whose Topic is a `fiction` root, so everything nested inherits it (uses the doc's scope rule, costs no header bits). Alternative: take 1 bit from word count (20 → 19) for a "hypothetical" flag. |
+| **Q-1** | V2.0 dropped V1's **Fact vs Fiction** statement subtypes. Should fiction be markable? | **Accepted in v2.2 (D-43).** Yes, but not as a subtype. Mark it as a scope: put fiction inside a Narrator-level sentence whose Topic is a `fiction` root, so everything nested inherits it (uses the doc's scope rule, costs no header bits). Alternative: take 1 bit from word count (20 → 19) for a "hypothetical" flag. |
 | **Q-2** | Grammar on externals: casts (current, +1 uncounted word) or a denser typed-lexical form? | Keep casts. They keep externals' full 56-bit payload, match the doc's description of operations, and the cost is one word only when an external needs a role. |
 | **Q-3** | Semantic locality: pure tree (current) or add feature bits (animate, made, audible …) for cross-cutting closeness? | Keep the tree until the lexicon passes ~500 roots. Then consider spending the top 2–4 concept bits on features, measured with `tools/locality_report.py`. |
 | **Q-4** | Header budget: word count 20 bits / span 32 bits. Other split? | Keep it. 1M words per sentence is ample; a 32-bit span lets a single sentence wrap a large blob (e.g. an image). |
-| **Q-5** | Direction convention: the doc says both "z-y-z" and "yaw, pitch, roll". | Yaw-pitch-roll (z-y′-x″). It is what "objective: 0 = north, vertical up" implies. |
+| **Q-5** | Direction convention: the doc says both "z-y-z" and "yaw, pitch, roll". | **Accepted in v2.2 (D-44).** Yaw-pitch-roll (z-y′-x″). It is what "objective: 0 = north, vertical up" implies. |
 | **Q-6** | File metadata from the XML sketch (`cant id`, `author`, `dict` URI): binary form? | Add an optional second control word, `0x43 meta`, followed by a Narrator sentence holding `id()`/`uri()` externals. Deferred until a second lexicon exists. |
 | **Q-7** | Should `Correction` (`0xF8`) stay as proposed? | Yes. It pairs naturally with Deletion and `ptr()`. |
 | **Q-8** | Relation binding with several subjects: Subjects × Objects (current, from the Jim/Carol/Jack example) or nearest pair? | Keep Subjects × Objects with the explicit link for narrowing. It matches the doc example exactly. |

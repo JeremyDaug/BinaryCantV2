@@ -1,7 +1,8 @@
-# Binary Cant V2.1 — Specification
+# Binary Cant V2.1 — Specification (with v2.2 language conventions)
 
 Binary Cant is a machine-first language built on the 64-bit word. This document is the
-normative bit-level spec for **V2.1**. It consolidates the user's *Binary Cant* Google Doc
+normative bit-level spec for **V2.1**. The v2.2 release changes no bits. It adds a larger
+lexicon and the conventions in §14 for expressing ordinary (English-like) content. It consolidates the user's *Binary Cant* Google Doc
 (V1 16/32-bit notes plus the V2.0 64-bit draft), the *Binary Cant Spreadsheet*, and the 2018
 Python prototype into one consistent design. The reference codec in `cant/` implements every
 rule here. `tests/test_spec_examples.py` checks every example in §12 against the hex shown.
@@ -399,14 +400,17 @@ distance properties:
   differ by exactly 1 bit, and nearby siblings by a few.
 * **Category** (bits 1..0) holds the four senses of a root. They differ by 1–2 bits.
 
-Measured over the seeded lexicon (`python3 tools/locality_report.py`; asserted in `tests/test_locality.py`):
+Measured over the lexicon (`python3 tools/locality_report.py`; asserted in `tests/test_locality.py`).
+v2.2 grew the lexicon from 43 to 337 roots without moving any existing root:
 
-| Pair type | n | mean Hamming distance (of 32) |
-|---|---|---|
-| same root, different sense | 110 | 1.34 |
-| same cluster (siblings) | 170 | 2.17 |
-| same domain, other cluster | 813 | 5.69 |
-| different domain | 4685 | 10.12 (min 4) |
+| Pair type | n (v2.2) | mean Hamming distance of 32, v2.2 | v2.1 (43 roots) |
+|---|---|---|---|
+| same root, different sense | 452 | 1.28 | 1.34 |
+| same cluster (siblings) | 2 595 | 2.36 | 2.17 |
+| same domain, other cluster | 14 889 | 6.06 | 5.69 |
+| different domain | 197 560 | 9.94 (min 4) | 10.12 (min 4) |
+| *related (same root or cluster)* | 3 047 | **2.20** | — |
+| *unrelated (different domain)* | 197 560 | **9.94** | — |
 
 The CLI reports both metrics: `cant distance mover.act manipulator.obj`.
 
@@ -709,3 +713,50 @@ that it *is a tool* (object used as a verb = "to be").
   disagreement; links or operations that reach outside their sentence; type-invalid operations;
   forward or misaligned pointers; and file-length or version mismatches.
 * Round-trip: decode(encode(x)) must reproduce x bit for bit.
+
+---
+
+## 14. Changelog
+
+### v2.2 — language conventions, lexicon growth, tooling (no bit-layout change)
+
+**The wire format is unchanged.** Every V2.1 stream decodes the same way. The file header
+still carries version byte `0x21`, because the version byte names the *bit layout*, and that
+did not change. Every example in §12 still encodes to the same hex.
+
+**Lexicon.** 43 → **337 roots**. New domains: 8 motion and transfer · 9 making and change ·
+10 places and nature · 11 time · 12 quantity · 13 spatial relations · 14 events and manner.
+Existing domains got new clusters (core identity/truth/cause/modality, body structure, animals,
+plants, people, machines, groups, social exchange, language, artifacts, qualities, cognition).
+New rows have `source = proposed-v2.2` and await author review. **No existing root ID moved.**
+Locality is preserved (§9): related pairs average 2.20 bits apart, unrelated pairs 9.94.
+
+**Conventions [v2.2]** (DECISIONS §G). Encoders *should* use these so that independent
+implementations say the same thing the same way. Decoders need no change, since all of these
+are ordinary V2.1 words.
+
+| # | Meaning | Encoding |
+|---|---|---|
+| C-1 | Scalar quality ("big", "small", "hot", "cold") | One quality root with the **degree** field: Small = the low pole, Large = the high pole; "very" moves one step outward (Large→Maximal, Small→Minimal). No antonym roots. |
+| C-2 | Predicate adjective / noun ("is big", "is a friend") | Object-as-verb: `size.obj<V,Present,Large>`, `friend.obj<V,Present>` (§5 role × category). |
+| C-3 | Genitive / possessor | A word in the Relation role whose category is **not** `rel` (or a cast external) binds to the preceding nominal as its possessor: `dwelling.obj<S> friend.obj<R> self.obj<R>` = "my friend's house". In a chain, each genitive owns the one before it. |
+| C-4 | Negation | Verb degree **None**. If the verb's degree is already used, add a following `null.act<M>`. |
+| C-5 | Prepositional phrase | `NP<O>` followed by a preposition-like relation linked back to it: `garden.obj<O> interior.rel<R,^1>`. |
+| C-6 | Transitive state verbs (have, want, know, like) | An **unlinked** relation: it relates all preceding Subjects × preceding Objects (§8, Jim/Carol/Jack rule). `possession.rel`, `desire.rel`, `knowledge.rel`, `pleasure.rel`. |
+| C-7 | Comparative ("bigger than X") | `X<O>` + the quality's relation sense (`size.rel<R>`); negated with degree None. |
+| C-8 | Demonstrative determiner ("that dog") | Apposition: `dog.obj<S> that.obj<S,^1>`. |
+| C-9 | Quantity determiners | `amount.obj<M,degree>`: all = Total, many = Large, some = Medium, few = Small, no = None. |
+| C-10 | Time adverbs | A time root as modifier, tensed: yesterday = `day.obj<M,Past>`, tomorrow = `day.obj<M,Future>`, now/then/soon = `moment.obj<M,…>`. |
+| C-11 | Questions | `QUERY<Verb>` + verb = yes/no; `QUERY<Verb>` with no verb = "what is X?"; `QUERY<Object>` = what (object); `QUERY<Subject>` = who; Location/Time/Reasoning/Explain = where/when/why/how; Specify = which. With no verb, tense goes on the subject. |
+| C-12 | Imperative | `STATEMENT<Imperative>`, no Subject, verb Timeless. |
+| C-13 | Existential ("there is X") | `existence.act<V>` with X as Subject. |
+| C-14 | Location as verb ("X is at home") | The root's `.loc` sense as Verb = "be at": `dwelling.loc<V,Present>`. Motion toward = motion verb + InProgress + `toward.rel` (Q-5 default accepted). |
+| C-15 | Fiction (Q-1 accepted) | A Narrator-level sentence whose Topic is `story.obj`, with the fictional sentences nested inside it. Scope inheritance marks them fictional at no header cost. |
+| C-16 | Direction | `dir()` stays yaw-pitch-roll (z-y′-x″), as in §6 (Q-5 accepted). |
+| C-17 | Unknown words | `text("…")` + `TO_<role>` cast. A whole unparseable sentence becomes `text(…) TO_TOPIC`. |
+| C-18 | Indirect object | `to` phrase: `book.obj<O> woman.obj<O> toward.rel<R,^1>` (two bare Objects mean "and"). |
+
+**Tooling.** `cant/english` (en2cant / cant2en, TRANSLATION.md), `cant translate`, the
+`cant serve` web UI and JSON API (README), and `tools/build_lexicon_v22.py`, which generates
+the v2.2 rows and the English mapping.
+
