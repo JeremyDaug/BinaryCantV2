@@ -1,0 +1,44 @@
+root,key,domain,cluster,concept,object,relation,action,location,source,proposed_senses,notes
+0x00000000,null,0,0,0,Null,Unrelated,Nothing (happening),Nowhere,doc,,Doc Words Methodology reserved values; root 0. null.act = doc example 0x...0002 exactly
+0x00000001,nothing,0,0,1,Nothing (the empty object),,,,sheet+doc,,"Spreadsheet row ""nothing""; doc Methodology Nothing(object). Other senses are covered by root 0"
+0x0003C000,existence,0,1,0,existence,connected,exists,universe,sheet,,
+0x0003C001,abstraction,0,1,1,abstraction (an idea or concept),abstracted from,abstracting,in the abstract,proposed,obj;rel;act;loc,"Doc Methodology ""Abstract""; proposed"
+0x000CC000,self,0,2,0,self (the current speaker),,,at self,proposed,obj;loc,Essential function root
+0x000CC001,addressee,0,2,1,addressee (the current listener; you),,,at the addressee,proposed,obj;loc,"Named addressee to avoid clashing with sheet sense ""listener"""
+0x000CC003,other,0,2,2,other (third party; he/she/they/it),,,at the other,proposed,obj;loc,Gender-neutral by the doc word-default rule
+0x000CC002,this,0,2,3,this (proximal referent),,,here,proposed,obj;loc,
+0x000CC006,that,0,2,4,that (distal referent),,,there,proposed,obj;loc,
+0x000F0000,possession,0,3,0,possession (an owned thing),possessor (S possesses O),possessing,in the possession of,proposed,obj;rel;act;loc,"Needed for ""His shirt is red"""
+0x03C00000,manipulator,1,0,0,manipulator,manipulator,to manipulate,at manipulator,sheet,,Doc: hand / in hand / one who manipulates / using someone
+0x03C00001,mover,1,0,1,mover,mover,to move,by mover,sheet,,"2018 V1 ""run"" = mover.act<Large>"
+0x03C3C000,auditory_communicator,1,1,0,auditory communicator,speaker,speaking,tongue,sheet,,"2018 V1 ""speaker"" = auditory_communicator.rel"
+0x03C3C001,auditory_listener,1,1,1,auditory listener,listener,listening,ears,sheet,,"2018 V1 ""listener"" = auditory_listener.rel"
+0x03CCC000,contact_sensor,1,2,0,contact sensor,,sensing by contact,,sheet,act,
+0x03CCC001,olfactory_sensor,1,2,1,olfactory sensor,,smelling,,sheet,act,
+0x03CF0000,sustenance_orifice,1,3,0,sustenance orifice,S eats O,eating,at the sustenance orifice,sheet,act;loc,
+0x03CF0001,waste_orifice,1,3,1,waste orifice,,excreting,,sheet,act,
+0x03D54000,controller,1,4,0,controller,controller of,controlling,,sheet,rel;act,
+0x03D54001,power_pump,1,4,1,power pump,,pumping,,sheet,act,
+0x03D54003,energy_storage,1,4,2,energy storage,,storing energy,,sheet,act,
+0x0CC00000,sophont,2,0,0,sophont,,,,sheet,,"2018 V1 ""person"" = sophont.obj"
+0x0CC00001,animal,2,0,1,animal,,,,sheet,,
+0x0CC00003,uncontrolled,2,0,2,uncontrolled (thing without a controller),,,,sheet,,Gloss of sheet entry is an assumption; see DECISIONS
+0x0CC00002,inanimate_object,2,0,3,inanimate object,,,,sheet,,
+0x0F000000,parent,3,0,0,parent,parent,parenting,parent's home,sheet,,
+0x0F000001,kin,3,0,1,kin,family (S is family of O),,,proposed,obj;rel,"Doc Jim/Carol/Jack example ""Family"""
+0x0F000003,partner,3,0,2,partnership,couple (S is partnered with O),partnering,,proposed,obj;rel;act,"Doc Jim/Carol/Jack example ""Couple"""
+0x0F03C000,mentor,3,1,0,mentor,mentor of,mentoring,,sheet,rel;act,
+0x0F0CC000,friend,3,2,0,friend,friend of,befriending,,v1-2018,rel;act,"2018 lexCant_default.csv ""friend"""
+0x0F0F0000,greeting,3,3,0,greeting,,to greet,,v1-2018,obj,"2018 lexCant_default.csv ""greet"""
+0x15400000,cover,4,0,0,"cover (clothing, e.g. a shirt)",,covering (wearing),,sheet,act,"Sheet ""cover(clothing)"""
+0x1543C000,tool,4,1,0,tool,,,,sheet,,
+0x1543C001,instrument,4,1,1,instrument,,,,sheet,,Sits with tool; see SPEC 9.4 on one-parent limits
+0x154CC000,interface,4,2,0,interface,,,,sheet,,
+0x154F0000,dwelling,4,3,0,dwelling,resident of,dwelling (residing),home,proposed,obj;rel;act;loc,home = dwelling.loc
+0x16800000,music,5,0,0,music,,making music,,sheet,act,
+0x16800001,musician,5,0,1,musician,,,,sheet,,
+0x16800003,band,5,0,2,band (musical group),,,,sheet,,
+0x19800000,height,6,0,0,height,taller than,growing taller,at height,v1-2018,rel;act;loc,"2018 V1 ""tall"" = height<M,Large>"
+0x19800001,size,6,0,1,size,larger than,growing,,proposed,obj;rel;act,
+0x1A400000,pleasure,7,0,0,pleasure,enjoys (S enjoys O),enjoying,,v1-2018,obj;rel,"2018 V1 ""enjoy"" = pleasure.act"
+0x3FFFFFFF,everything,15,15,10922,Everything,related to everything,everything happening,Everywhere,doc,rel;act,Doc Methodology all-ones value; root 0x3FFFFFFF
